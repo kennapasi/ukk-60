@@ -9,7 +9,11 @@ use Illuminate\Support\Facades\Auth;
 
 class TransactionController extends Controller
 {
-    // USER: Lihat riwayat sendiri
+    // ==========================================
+    // AREA USER
+    // ==========================================
+
+    // Lihat riwayat
     public function index() {
         $transactions = Transaction::with('book')
             ->where('user_id', Auth::id())
@@ -18,7 +22,7 @@ class TransactionController extends Controller
         return view('transactions.index', compact('transactions'));
     }
 
-    // USER: Mengajukan Pinjaman (Belum mengurangi stok)
+    // Mengajukan Pinjaman
     public function store(Request $request) {
         $request->validate(['book_id' => 'required|exists:books,id']);
         $book = Book::findOrFail($request->book_id);
@@ -27,57 +31,80 @@ class TransactionController extends Controller
             return back()->with('error', 'Maaf, stok buku sedang habis.');
         }
 
-        // Cek jika user sedang meminjam atau menunggu ACC untuk buku yang sama
-        $pendingOrBorrowed = Transaction::where('user_id', Auth::id())
+        // Cek jika masih ada transaksi menggantung di buku ini
+        $isProcessing = Transaction::where('user_id', Auth::id())
             ->where('book_id', $book->id)
-            ->whereIn('status', ['pending_pinjam', 'pinjam'])
+            ->whereIn('status', ['pending_pinjam', 'pinjam', 'pending_kembali'])
             ->exists();
 
-        if ($pendingOrBorrowed) {
-            return back()->with('error', 'Anda sudah mengajukan atau sedang meminjam buku ini.');
+        if ($isProcessing) {
+            return back()->with('error', 'Anda masih meminjam atau dalam antrean untuk buku ini.');
         }
 
         Transaction::create([
             'user_id' => Auth::id(),
             'book_id' => $book->id,
             'tanggal_pinjam' => now(),
-            'status' => 'pending_pinjam' // Status baru: Menunggu ACC Admin
+            'status' => 'pending_pinjam' // Nunggu ACC Admin
         ]);
 
-        return redirect()->route('transactions.index')->with('success', 'Permintaan pinjam dikirim. Silakan hubungi admin untuk ambil buku.');
+        return redirect()->route('transactions.index')->with('success', 'Permintaan pinjam dikirim. Silakan ambil buku di petugas.');
     }
 
-    // ADMIN: Lihat semua antrean transaksi
+    // USER: Inisiatif mengembalikan buku
+    public function userReturnBook(Transaction $transaction) {
+        // Pastikan ini buku milik user tersebut
+        if ($transaction->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($transaction->status === 'pinjam') {
+            $transaction->update(['status' => 'pending_kembali']);
+            return back()->with('success', 'Laporan pengembalian dikirim. Silakan serahkan fisik buku ke petugas.');
+        }
+
+        return back()->with('error', 'Aksi tidak diizinkan.');
+    }
+
+
+    // ==========================================
+    // AREA ADMIN
+    // ==========================================
+
     public function adminIndex() {
         $transactions = Transaction::with(['book', 'user'])->latest()->get();
         return view('admin.transactions.index', compact('transactions'));
     }
 
-    // ADMIN: Proses ACC Pinjam / ACC Kembali
+    // ACC Status Peminjaman (Super Logic)
     public function updateStatus(Transaction $transaction, $newStatus) {
-        // Jika Admin ACC Pinjam -> Baru Stok Berkurang
+
+        // 1. Admin ACC Pinjam -> Stok berkurang
         if ($newStatus === 'pinjam' && $transaction->status === 'pending_pinjam') {
             if ($transaction->book->stok > 0) {
                 $transaction->book->decrement('stok');
                 $transaction->update(['status' => 'pinjam']);
-                return back()->with('success', 'Peminjaman disetujui, stok buku berkurang.');
+                return back()->with('success', 'Buku diserahkan ke Peminjam. Stok dikurangi.');
             }
-            return back()->with('error', 'Gagal ACC, stok tiba-tiba habis.');
+            return back()->with('error', 'Gagal ACC, stok sudah habis.');
         }
 
-        // Jika User balikin buku -> Admin tidak langsung ACC, tapi status jadi 'pending_kembali'
-        // (Opsional: User bisa klik 'Kembalikan' di dashboard mereka untuk lapor sudah balikin)
+        // 2. Admin TOLAK Pinjam -> Transaksi batal
+        if ($newStatus === 'ditolak' && $transaction->status === 'pending_pinjam') {
+            $transaction->update(['status' => 'ditolak']);
+            return back()->with('success', 'Permintaan pinjam ditolak.');
+        }
 
-        // Jika Admin ACC Kembali -> Stok Bertambah
-        if ($newStatus === 'kembali' && $transaction->status === 'pinjam') {
+        // 3. Admin ACC Kembali -> Stok bertambah
+        if ($newStatus === 'kembali' && $transaction->status === 'pending_kembali') {
             $transaction->update([
                 'status' => 'kembali',
                 'tanggal_kembali' => now()
             ]);
             $transaction->book->increment('stok');
-            return back()->with('success', 'Buku telah diterima kembali, stok bertambah.');
+            return back()->with('success', 'Buku telah diterima petugas. Stok bertambah.');
         }
 
-        return back()->with('error', 'Tindakan tidak valid.');
+        return back()->with('error', 'Tindakan tidak valid atau status sudah berubah.');
     }
 }

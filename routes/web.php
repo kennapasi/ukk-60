@@ -36,18 +36,23 @@ Route::middleware(['auth'])->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    // =====================================
     // -- AREA USER BIASA --
+    // =====================================
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
     Route::get('/books', [BookController::class, 'index'])->name('books.index');
     Route::get('/my-loans', [TransactionController::class, 'index'])->name('transactions.index');
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');
 
+    // NAH, RUTENYA DITARUH DI SINI:
+    Route::patch('/transactions/{transaction}/user-return', [TransactionController::class, 'userReturnBook'])->name('transactions.userReturn');
+
+
+    // =====================================
     // -- AREA KHUSUS ADMIN --
+    // =====================================
     Route::prefix('admin')->middleware(['is_admin'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-        // Dalam grup admin
-Route::patch('/transactions/{transaction}/{status}', [TransactionController::class, 'updateStatus'])->name('admin.transactions.update');
-
 
         // Manajemen Buku
         Route::get('/books-manage', [BookController::class, 'adminIndex'])->name('admin.books.index');
@@ -57,9 +62,9 @@ Route::patch('/transactions/{transaction}/{status}', [TransactionController::cla
         Route::put('/books/{book}', [BookController::class, 'update'])->name('books.update');
         Route::delete('/books/{book}', [BookController::class, 'destroy'])->name('books.destroy');
 
-        // Manajemen Transaksi
+        // Manajemen Transaksi (Sudah dirapikan)
         Route::get('/transactions', [TransactionController::class, 'adminIndex'])->name('admin.transactions.index');
-        Route::patch('/transactions/{transaction}/return', [TransactionController::class, 'returnBook'])->name('transactions.return');
+        Route::patch('/transactions/{transaction}/{status}', [TransactionController::class, 'updateStatus'])->name('admin.transactions.update');
 
         // Manajemen User
         Route::get('/users', [AdminController::class, 'usersIndex'])->name('admin.users.index');

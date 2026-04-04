@@ -9,17 +9,19 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+   public function up(): void
     {
-        Schema::create('jobs', function (Blueprint $table) {
+        Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->string('queue')->index();
-            $table->longText('payload');
-            $table->unsignedTinyInteger('attempts');
-            $table->unsignedInteger('reserved_at')->nullable();
-            $table->unsignedInteger('available_at');
-            $table->unsignedInteger('created_at');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('book_id')->constrained('books')->onDelete('cascade');
+            $table->date('tanggal_pinjam');
+            $table->date('tanggal_kembali')->nullable();
+            // PERBAIKAN: Tambahkan semua kemungkinan status di sini
+            $table->enum('status', ['pending_pinjam', 'pinjam', 'pending_kembali', 'kembali', 'ditolak'])->default('pending_pinjam');
+            $table->timestamps();
         });
+    
 
         Schema::create('job_batches', function (Blueprint $table) {
             $table->string('id')->primary();
