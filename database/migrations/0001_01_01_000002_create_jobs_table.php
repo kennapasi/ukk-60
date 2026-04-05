@@ -11,17 +11,17 @@ return new class extends Migration
      */
    public function up(): void
     {
-        Schema::create('transactions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('book_id')->constrained('books')->onDelete('cascade');
-            $table->date('tanggal_pinjam');
-            $table->date('tanggal_kembali')->nullable();
-            // PERBAIKAN: Tambahkan semua kemungkinan status di sini
-            $table->enum('status', ['pending_pinjam', 'pinjam', 'pending_kembali', 'kembali', 'ditolak'])->default('pending_pinjam');
-            $table->timestamps();
-        });
-    
+        // Schema::create('transactions', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+        //     $table->foreignId('book_id')->constrained('books')->onDelete('cascade');
+        //     $table->date('tanggal_pinjam');
+        //     $table->date('tanggal_kembali')->nullable();
+        //     // PERBAIKAN: Tambahkan semua kemungkinan status di sini
+        //     $table->enum('status', ['pending_pinjam', 'pinjam', 'pending_kembali', 'kembali', 'ditolak'])->default('pending_pinjam');
+        //     $table->timestamps();
+        // });
+
 
         Schema::create('job_batches', function (Blueprint $table) {
             $table->string('id')->primary();

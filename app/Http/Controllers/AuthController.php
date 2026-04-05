@@ -14,28 +14,37 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request) {
-        $request->validate([
-            'login_id' => 'required|string',
-            'password' => 'required|string',
-        ]);
+    // app/Http/Controllers/AuthController.php
 
-        // Perbaikan: Ubah 'username' menjadi 'name' sesuai struktur DB Laravel
-        $loginType = filter_var($request->login_id, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
-        $credentials = [$loginType => $request->login_id, 'password' => $request->password];
+public function login(Request $request) {
+    $request->validate([
+        'login_id' => 'required|string',
+        'password' => 'required|string',
+    ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
+    // Cek apakah input adalah email atau username/name
+    $loginType = filter_var($request->login_id, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
 
-            // Redirect sesuai jabatan
-            if (Auth::user()->role === 'admin') {
-                return redirect()->route('admin.dashboard');
-            }
-            return redirect()->route('user.dashboard');
+    // Pastikan kredensial menggunakan key yang benar sesuai DB
+    $credentials = [
+        $loginType => $request->login_id,
+        'password' => $request->password
+    ];
+
+    if (Auth::attempt($credentials, $request->remember)) {
+        $request->session()->regenerate();
+
+        // Redirect menggunakan role (peminjam/admin)
+        if (Auth::user()->role === 'admin') {
+            return redirect()->intended('/admin/dashboard');
         }
-
-        return back()->withErrors(['login_id' => 'Email/Nama atau Password salah.'])->withInput();
+        return redirect()->intended('/dashboard');
     }
+
+    return back()->withErrors([
+        'login_id' => 'Kredensial yang diberikan tidak cocok dengan data kami.',
+    ])->withInput($request->only('login_id'));
+}
 
     // --- FITUR REGISTER ---
     public function showRegisterForm() {

@@ -10,16 +10,29 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Mengecek apakah admin sudah ada agar tidak error duplicate saat di-seed ulang
-        $admin = User::where('email', 'admin@perpusku.com')->first();
-
-        if (!$admin) {
+        // 1. Buat Akun Admin (Jika belum ada)
+        if (!User::where('role', 'admin')->exists()) {
             User::create([
                 'name' => 'Super Admin',
+                'username' => 'admin',
                 'email' => 'admin@perpusku.com',
-                'password' => Hash::make('admin123'), // Password default admin
+                'password' => Hash::make('admin123'),
                 'role' => 'admin',
             ]);
         }
+
+        // 2. Buat Akun User Peminjam (Jika belum ada)
+        if (!User::where('email', 'user@gmail.com')->exists()) {
+            User::create([
+                'name' => 'Budi Santoso',
+                'username' => 'budis',
+                'email' => 'user@gmail.com',
+                'password' => Hash::make('user123'),
+                'role' => 'peminjam',
+            ]);
+        }
+
+        // 3. (Opsional) Buat beberapa user tambahan secara otomatis
+        // User::factory(5)->create(['role' => 'peminjam']);
     }
 }
