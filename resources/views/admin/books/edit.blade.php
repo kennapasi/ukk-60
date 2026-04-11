@@ -3,7 +3,7 @@
 @section('content')
 <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 max-w-2xl mx-auto">
     <div class="mb-6 border-b border-slate-100 pb-4">
-        <h2 class="text-2xl font-bold text-slate-800">Edit Data Buku ✏️</h2>
+        <h2 class="text-2xl font-bold text-slate-800">Edit Data Buku Anda!</h2>
     </div>
 
     <form action="{{ route('books.update', $book->id) }}" method="POST" enctype="multipart/form-data">

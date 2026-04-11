@@ -97,13 +97,13 @@ class TransactionController extends Controller
             return back()->with('success', 'Permintaan pinjam ditolak.');
         }
 
-        // 3. Admin ACC Kembali -> Stok bertambah
-        if ($newStatus === 'kembali' && $transaction->status === 'pending_kembali') {
+        // 3. PERBAIKAN: Admin ACC Kembali (Bisa dari status 'pinjam' atau 'pending_kembali') -> Stok bertambah
+        if ($newStatus === 'kembali' && in_array($transaction->status, ['pinjam', 'pending_kembali'])) {
             $transaction->update([
                 'status' => 'kembali',
                 'tanggal_kembali' => now()
             ]);
-            $transaction->book->increment('stok');
+            $transaction->book->increment('stok'); // <-- Stok pasti nambah di sini
             return back()->with('success', 'Buku telah diterima petugas. Stok bertambah.');
         }
 
