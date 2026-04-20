@@ -116,6 +116,7 @@
             right: 20%;
             animation-delay: -6s;
         }
+    
 
         .bubble-4 {
             width: 350px;

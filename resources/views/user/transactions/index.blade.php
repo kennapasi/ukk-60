@@ -82,9 +82,9 @@
                                 <form action="{{ route('transactions.userReturn', $trx->id) }}" method="POST">
                                     @csrf
                                     @method('PATCH')
-                                    <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition-colors" onclick="return confirm('Kamu yakin ingin mengembalikan buku ini? Silakan serahkan fisik buku ke petugas setelah klik OK.')">
+                                    {{-- <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition-colors" onclick="return confirm('Kamu yakin ingin mengembalikan buku ini? Silakan serahkan fisik buku ke petugas setelah klik OK.')">
                                         <i class="fas fa-undo mr-1"></i> Kembalikan
-                                    </button>
+                                    </button> --}}
                                 </form>
                             @elseif($trx->status == 'pending_kembali')
                                 <span class="text-purple-500 text-xs italic"><i class="fas fa-hourglass-half"></i> Menunggu ACC Admin</span>

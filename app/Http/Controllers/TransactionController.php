@@ -24,6 +24,7 @@ class TransactionController extends Controller
     return view('user.transactions.index', compact('transactions'));
 }
 
+<<<<<<< HEAD
   // USER: Mengajukan Pinjaman (Dengan Pop-up Pilihan Waktu)
     public function store(Request $request) {
         $request->validate([
@@ -31,6 +32,11 @@ class TransactionController extends Controller
             'lama_pinjam' => 'required|numeric' // Pastikan ini wajib diisi
         ]);
 
+=======
+    // Mengajukan Pinjaman
+    public function store(Request $request) {
+        $request->validate(['book_id' => 'required|exists:books,id']);
+>>>>>>> 69453017169a1cc851e0730439d45c0a649af4ec
         $book = Book::findOrFail($request->book_id);
 
         if ($book->stok <= 0) {
@@ -51,6 +57,7 @@ class TransactionController extends Controller
             'user_id' => Auth::id(),
             'book_id' => $book->id,
             'tanggal_pinjam' => now(),
+<<<<<<< HEAD
             // Pengaman (int) agar terhindar dari error perhitungan Carbon
             'tanggal_kembali' => now()->addDays((int)$request->lama_pinjam),
             'status' => 'pending_pinjam'
@@ -58,6 +65,14 @@ class TransactionController extends Controller
 
         return redirect()->route('transactions.index')->with('success', 'Berhasil! Permintaan pinjam dikirim ke Admin. Silakan ambil buku di petugas.');
     }
+=======
+            'status' => 'pending_pinjam' // Nunggu ACC Admin
+        ]);
+
+        return redirect()->route('transactions.index')->with('success', 'Permintaan pinjam dikirim. Silakan ambil buku di petugas.');
+    }
+
+>>>>>>> 69453017169a1cc851e0730439d45c0a649af4ec
     // USER: Inisiatif mengembalikan buku
     public function userReturnBook(Transaction $transaction) {
         // Pastikan ini buku milik user tersebut
@@ -102,8 +117,13 @@ class TransactionController extends Controller
             return back()->with('success', 'Permintaan pinjam ditolak.');
         }
 
-      // 3. PERBAIKAN: Admin ACC Kembali (HANYA BISA dari status 'pending_kembali') -> Stok bertambah
-        if ($newStatus === 'kembali' && $transaction->status === 'pending_kembali') {
+<<<<<<< HEAD
+    //   // 3. PERBAIKAN: Admin ACC Kembali (HANYA BISA dari status 'pending_kembali') -> Stok bertambah
+    //     if ($newStatus === 'kembali' && $transaction->status === 'pending_kembali') {
+=======
+        // 3. PERBAIKAN: Admin ACC Kembali (Bisa dari status 'pinjam' atau 'pending_kembali') -> Stok bertambah
+        if ($newStatus === 'kembali' && in_array($transaction->status, ['pinjam', 'pending_kembali'])) {
+>>>>>>> 69453017169a1cc851e0730439d45c0a649af4ec
             $transaction->update([
                 'status' => 'kembali',
                 'tanggal_kembali' => now()
