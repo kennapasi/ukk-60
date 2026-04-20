@@ -18,7 +18,7 @@
     </div>
 
     <div class="mb-8">
-        <h2 class="text-3xl font-bold text-slate-800">Katalog Buku 📚</h2>
+        <h2 class="text-3xl font-bold text-slate-800">Katalog Buku</h2>
         <p class="text-slate-500 mt-2">Jelajahi koleksi buku kami dan pinjam buku favoritmu.</p>
     </div>
 
