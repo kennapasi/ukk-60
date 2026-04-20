@@ -77,7 +77,7 @@
                             @endif
                         </td>
 
-                        <td class="p-4 text-center">
+                       <td class="p-4 text-center">
                             @if($trx->status == 'pinjam')
                                 <form action="{{ route('transactions.userReturn', $trx->id) }}" method="POST">
                                     @csrf
@@ -86,6 +86,8 @@
                                         <i class="fas fa-undo mr-1"></i> Kembalikan
                                     </button>
                                 </form>
+                            @elseif($trx->status == 'pending_kembali')
+                                <span class="text-purple-500 text-xs italic"><i class="fas fa-hourglass-half"></i> Menunggu ACC Admin</span>
                             @else
                                 <span class="text-slate-300 text-xs italic">Tidak ada aksi</span>
                             @endif

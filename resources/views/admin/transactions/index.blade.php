@@ -36,15 +36,20 @@
                     <td class="py-4 px-4 font-medium text-slate-700">{{ $trx->user->name ?? 'User Dihapus' }}</td>
                     <td class="py-4 px-4 text-slate-600">{{ $trx->book->judul ?? 'Buku Dihapus' }}</td>
                     <td class="py-4 px-4 text-slate-500">{{ \Carbon\Carbon::parse($trx->tanggal_pinjam)->format('d M Y') }}</td>
-                    <td class="py-4 px-4">
+                   <td class="py-4 px-4">
                         @if($trx->status == 'pending_pinjam')
-                            <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold border border-blue-200">Menunggu ACC</span>
+                            <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold border border-blue-200">Menunggu ACC Pinjam</span>
                         @elseif($trx->status == 'pinjam')
                             <span class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-xs font-bold border border-amber-200">Sedang Dipinjam</span>
+                        @elseif($trx->status == 'pending_kembali')
+                            <span class="bg-purple-50 text-purple-600 px-3 py-1 rounded-full text-xs font-bold border border-purple-200">Menunggu ACC Kembali</span>
+                        @elseif($trx->status == 'ditolak')
+                            <span class="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold border border-red-200">Ditolak Admin</span>
                         @else
                             <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200">Sudah Kembali</span>
                         @endif
                     </td>
+
                     <td class="py-4 px-4 text-center">
                         @if($trx->status == 'pending_pinjam')
                             <form action="{{ route('admin.transactions.update', [$trx->id, 'pinjam']) }}" method="POST" class="inline-block">
@@ -55,10 +60,12 @@
                                 </button>
                             </form>
                         @elseif($trx->status == 'pinjam')
+                            <span class="text-amber-500 text-xs italic"><i class="fas fa-clock"></i> Belum dikembalikan siswa</span>
+                        @elseif($trx->status == 'pending_kembali')
                             <form action="{{ route('admin.transactions.update', [$trx->id, 'kembali']) }}" method="POST" class="inline-block">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-emerald-700 shadow-sm transition-colors" onclick="return confirm('Konfirmasi buku telah dikembalikan? Stok buku akan bertambah.')">
+                                <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-emerald-700 shadow-sm transition-colors" onclick="return confirm('Konfirmasi buku telah diterima petugas? Stok buku akan bertambah kembali.')">
                                     <i class="fas fa-undo mr-1"></i> ACC KEMBALI
                                 </button>
                             </form>
